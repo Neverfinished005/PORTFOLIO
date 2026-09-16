@@ -5,14 +5,12 @@ export default function CustomCursor() {
   const [isVisible, setIsVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
-  const [coords, setCoords] = useState({ x: 0, y: 0 });
 
   const mouseX = useMotionValue(-100);
   const mouseY = useMotionValue(-100);
 
-  // Smooth springs for cursor trailing ring
-  const springX = useSpring(mouseX, { damping: 25, stiffness: 250 });
-  const springY = useSpring(mouseY, { damping: 25, stiffness: 250 });
+  const springX = useSpring(mouseX, { damping: 28, stiffness: 300 });
+  const springY = useSpring(mouseY, { damping: 28, stiffness: 300 });
 
   useEffect(() => {
     // Disable on touch devices
@@ -23,10 +21,6 @@ export default function CustomCursor() {
     const handleMouseMove = (e: MouseEvent) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
-      setCoords({
-        x: Math.round((e.clientX / window.innerWidth) * 200 - 100),
-        y: Math.round((e.clientY / window.innerHeight) * 200 - 100),
-      });
       if (!isVisible) setIsVisible(true);
 
       const target = e.target as HTMLElement | null;
@@ -58,51 +52,33 @@ export default function CustomCursor() {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[9999] overflow-hidden">
-      {/* Outer Gravitational Lensing Ring */}
+      {/* Precision Trailing Ring */}
       <motion.div
-        className="absolute top-0 left-0 rounded-full border border-cyan-400/40 backdrop-invert-[0.1]"
+        className="absolute top-0 left-0 rounded-full border border-white/40"
         style={{
           x: springX,
           y: springY,
           translateX: '-50%',
           translateY: '-50%',
-          width: isHovered ? 48 : isClicked ? 24 : 32,
-          height: isHovered ? 48 : isClicked ? 24 : 32,
-          boxShadow: isHovered
-            ? '0 0 16px rgba(6,182,212,0.4), inset 0 0 8px rgba(6,182,212,0.3)'
-            : '0 0 8px rgba(255,255,255,0.2)',
-          transition: 'width 0.2s, height 0.2s, box-shadow 0.2s',
+          width: isHovered ? 36 : isClicked ? 18 : 24,
+          height: isHovered ? 36 : isClicked ? 18 : 24,
+          borderColor: isHovered ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.35)',
+          backgroundColor: isHovered ? 'rgba(255, 255, 255, 0.04)' : 'transparent',
+          transition: 'width 0.18s ease-out, height 0.18s ease-out, border-color 0.18s ease-out, background-color 0.18s ease-out',
         }}
-      >
-        {/* Reticle tick marks */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-1 bg-cyan-400/80" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[1px] h-1 bg-cyan-400/80" />
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-[1px] w-1 bg-cyan-400/80" />
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1px] w-1 bg-cyan-400/80" />
-      </motion.div>
+      />
 
-      {/* Central Laser Point */}
+      {/* Center Laser Point */}
       <motion.div
-        className="absolute top-0 left-0 w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_#ffffff]"
+        className="absolute top-0 left-0 w-1 h-1 rounded-full bg-white"
         style={{
           x: mouseX,
           y: mouseY,
           translateX: '-50%',
           translateY: '-50%',
-          scale: isClicked ? 0.6 : 1,
+          scale: isClicked ? 0.5 : 1,
         }}
       />
-
-      {/* Live Coordinate Badge */}
-      <motion.div
-        className="absolute top-0 left-0 ml-5 mt-5 font-mono text-[8px] tracking-widest text-cyan-400/70 select-none uppercase"
-        style={{
-          x: springX,
-          y: springY,
-        }}
-      >
-        <span>[{coords.x}, {coords.y}]</span>
-      </motion.div>
     </div>
   );
 }

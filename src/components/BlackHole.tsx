@@ -55,7 +55,7 @@ export default function BlackHole3D({
 
   return (
     <mesh ref={meshRef}>
-      <sphereGeometry args={[65, 64, 64]} />
+      <sphereGeometry args={[65, 32, 32]} />
       <shaderMaterial
         transparent
         side={THREE.BackSide}
@@ -92,11 +92,19 @@ export default function BlackHole3D({
               mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);
           }
 
+          // Optimized 2-octave noise for high FPS on laptops & mobile
+          float fbmFast(vec3 p) {
+            float f = 0.65 * noise(p);
+            p *= 2.05;
+            f += 0.35 * noise(p);
+            return f;
+          }
+
+          // Full background nebula noise
           float fbm(vec3 p) {
             float f = 0.5 * noise(p); p *= 2.02;
             f += 0.25 * noise(p); p *= 2.03;
-            f += 0.125 * noise(p); p *= 2.01;
-            f += 0.0625 * noise(p);
+            f += 0.125 * noise(p);
             return f;
           }
 
@@ -116,7 +124,7 @@ export default function BlackHole3D({
 
           vec3 getBackground(vec3 rd) {
             vec3 p = rd * 2.2;
-            float n = fbm(p + fbm(p + uTime * 0.015));
+            float n = fbm(p + uTime * 0.012);
             vec3 colorA = vec3(0.005, 0.01, 0.06);
             vec3 colorB = vec3(0.08, 0.01, 0.12);
             float density = pow(n, 3.5) * 0.35;
@@ -139,7 +147,8 @@ export default function BlackHole3D({
             float h2 = dot(L, L);
             vec3  col = vec3(0.0);
 
-            for (int i = 0; i < 180; i++) {
+            // Optimized step count & step size for smooth 60fps on laptops, phones, and tablets
+            for (int i = 0; i < 90; i++) {
               float r = length(p);
 
               // Solid black interior
@@ -149,7 +158,7 @@ export default function BlackHole3D({
               }
 
               float prevY = p.y;
-              vec3  nextP = p + v * 0.28;
+              vec3  nextP = p + v * 0.40;
 
               // Accretion disk — crosses y=0 plane
               if (prevY * nextP.y < 0.0) {
@@ -165,8 +174,8 @@ export default function BlackHole3D({
                   float radial = (d2 - innerR) / (outerR - innerR);
                   float speed  = mix(3.5, 0.6, radial);
 
-                  float diskN  = fbm(vec3(d2 * 0.35 - uTime * speed, phi * 5.0 + uTime * 0.3, uTime * 0.05));
-                  float diskN2 = fbm(vec3(phi * 3.0 + d2 * 0.2 - uTime * speed * 0.7, d2 * 0.5, 0.5));
+                  float diskN  = fbmFast(vec3(d2 * 0.35 - uTime * speed, phi * 5.0 + uTime * 0.3, uTime * 0.05));
+                  float diskN2 = fbmFast(vec3(phi * 3.0 + d2 * 0.2 - uTime * speed * 0.7, d2 * 0.5, 0.5));
                   float turb   = mix(diskN, diskN2, 0.4);
 
                   // Bright inner, fade outer
@@ -194,14 +203,14 @@ export default function BlackHole3D({
               }
 
               vec3 accel = -1.5 * rs * h2 * p / pow(r, 5.0);
-              v = normalize(v + accel * 0.28);
+              v = normalize(v + accel * 0.40);
               p = nextP;
 
-              if (r > 60.0) {
+              if (r > 48.0) {
                 col += getBackground(v);
                 break;
               }
-              if (i == 179) col += getBackground(v);
+              if (i == 89) col += getBackground(v);
             }
 
             // Relativistic Doppler speed streaks & blue-shift distortion during warp plunge

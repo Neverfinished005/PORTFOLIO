@@ -351,7 +351,11 @@ export default function App() {
       <div className="h-[200vh]">
         {/* Main 3D Scene */}
         <div className={`fixed inset-0 z-0 bg-black ${isFreeCam ? 'pointer-events-auto' : 'pointer-events-none'}`}>
-          <Canvas gl={{ antialias: false, powerPreference: "high-performance" }}>
+          <Canvas
+            dpr={[1, Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 1.5)]}
+            frameloop={isInsideSingularity ? "never" : "always"}
+            gl={{ antialias: false, powerPreference: "high-performance", stencil: false }}
+          >
             <PerspectiveCamera makeDefault position={[0, 4, 30]} fov={60} />
             <ambientLight intensity={0.7} />
             <pointLight position={[10, 10, 10]} intensity={1.2} />
@@ -364,10 +368,10 @@ export default function App() {
               isWarping={isWarping}
               warpIntensity={warpIntensity}
             />
-            <EffectComposer>
+            <EffectComposer multisampling={0}>
               <Bloom
-                intensity={1.2 + warpIntensity * 1.6}
-                luminanceThreshold={0.2}
+                intensity={1.1 + warpIntensity * 1.5}
+                luminanceThreshold={0.25}
                 mipmapBlur
               />
               <Vignette eskil={false} offset={0.1} darkness={1.1 + warpIntensity * 0.4} />

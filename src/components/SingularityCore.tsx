@@ -69,9 +69,19 @@ export default function SingularityCore({ onEscape }: SingularityCoreProps) {
 
   const handleCopyEmail = () => {
     soundEngine.playClickSound();
-    navigator.clipboard.writeText('rudra.vable@gmail.com');
-    setCopiedEmail(true);
-    setTimeout(() => setCopiedEmail(false), 2500);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText('rudra.vable@gmail.com')
+        .then(() => {
+          setCopiedEmail(true);
+          setTimeout(() => setCopiedEmail(false), 2500);
+        })
+        .catch(() => {
+          // Fallback if clipboard API is restricted
+          setCopiedEmail(false);
+        });
+    } else {
+      setCopiedEmail(false);
+    }
   };
 
   const handleSendMessage = (e: React.FormEvent) => {
@@ -79,11 +89,16 @@ export default function SingularityCore({ onEscape }: SingularityCoreProps) {
     soundEngine.playClickSound();
     setTransmissionSent(true);
 
-    const mailtoUrl = `mailto:rudra.vable@gmail.com?subject=${encodeURIComponent(
-      `[Portfolio Contact] ${senderSubject} — from ${senderName || 'Visitor'}`
-    )}&body=${encodeURIComponent(senderMessage || 'Hello Rudi, reaching out regarding your work.')}`;
+    const safeName = senderName.trim().slice(0, 100) || 'Visitor';
+    const safeSubject = senderSubject.slice(0, 100);
+    const safeMessage = senderMessage.trim().slice(0, 1500) || 'Hello Rudi, reaching out regarding your work.';
 
-    window.open(mailtoUrl, '_blank');
+    const mailtoUrl = `mailto:rudra.vable@gmail.com?subject=${encodeURIComponent(
+      `[Portfolio Contact] ${safeSubject} — from ${safeName}`
+    )}&body=${encodeURIComponent(safeMessage)}`;
+
+    // Safe navigation without triggering popup blockers or tab hijacking
+    window.location.href = mailtoUrl;
     setTimeout(() => setTransmissionSent(false), 3500);
   };
 
@@ -225,7 +240,7 @@ export default function SingularityCore({ onEscape }: SingularityCoreProps) {
               <a
                 href="https://github.com/Neverfinished005"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 onMouseEnter={() => soundEngine.playHoverSound()}
                 className="flex flex-col items-center justify-center py-2.5 px-2 border border-white/[0.08] hover:border-white/[0.2] bg-zinc-900/60 hover:bg-zinc-800 rounded-lg text-zinc-300 hover:text-white transition-colors"
               >
@@ -236,7 +251,7 @@ export default function SingularityCore({ onEscape }: SingularityCoreProps) {
               <a
                 href="https://www.linkedin.com/in/rudra-vable/"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 onMouseEnter={() => soundEngine.playHoverSound()}
                 className="flex flex-col items-center justify-center py-2.5 px-2 border border-white/[0.08] hover:border-white/[0.2] bg-zinc-900/60 hover:bg-zinc-800 rounded-lg text-zinc-300 hover:text-blue-400 transition-colors"
               >
@@ -247,7 +262,7 @@ export default function SingularityCore({ onEscape }: SingularityCoreProps) {
               <a
                 href="https://www.instagram.com/rudr_a.25"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 onMouseEnter={() => soundEngine.playHoverSound()}
                 className="flex flex-col items-center justify-center py-2.5 px-2 border border-white/[0.08] hover:border-white/[0.2] bg-zinc-900/60 hover:bg-zinc-800 rounded-lg text-zinc-300 hover:text-pink-400 transition-colors"
               >
@@ -305,7 +320,7 @@ export default function SingularityCore({ onEscape }: SingularityCoreProps) {
                   <a
                     href="https://github.com/Neverfinished005"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     onMouseEnter={() => soundEngine.playHoverSound()}
                     className="flex items-center gap-1 text-xs font-mono text-zinc-400 hover:text-white transition-colors"
                   >
@@ -320,7 +335,7 @@ export default function SingularityCore({ onEscape }: SingularityCoreProps) {
                       key={project.title}
                       href={project.url}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       onMouseEnter={() => soundEngine.playHoverSound()}
                       className="block p-3.5 sm:p-4 rounded-lg border border-white/[0.06] hover:border-white/[0.18] bg-zinc-950/40 hover:bg-zinc-900/60 transition-all group"
                     >
@@ -384,6 +399,8 @@ export default function SingularityCore({ onEscape }: SingularityCoreProps) {
                       <input
                         type="text"
                         required
+                        maxLength={100}
+                        autoComplete="name"
                         value={senderName}
                         onChange={(e) => setSenderName(e.target.value)}
                         placeholder="e.g. Alex / Engineering Team"
@@ -414,6 +431,7 @@ export default function SingularityCore({ onEscape }: SingularityCoreProps) {
                     <textarea
                       rows={3}
                       required
+                      maxLength={1500}
                       value={senderMessage}
                       onChange={(e) => setSenderMessage(e.target.value)}
                       placeholder="Write your note or project scope..."

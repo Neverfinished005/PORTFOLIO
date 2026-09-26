@@ -12,6 +12,7 @@ import { useState, useEffect, useRef } from 'react';
 import BlackHole3D from './components/BlackHole';
 import SingularityCore from './components/SingularityCore';
 import CustomCursor from './components/CustomCursor';
+import CyberProfileCard from './components/CyberProfileCard';
 import { soundEngine } from './utils/sfx';
 import * as THREE from 'three';
 
@@ -400,50 +401,15 @@ export default function App() {
           </button>
         </div>
 
-        {/* Black Hole Page Title — fades IN when scrolled */}
-        <div className="fixed inset-0 z-10 pointer-events-none flex items-end justify-center pb-36">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: hasScrolledDown && !isInsideSingularity ? 1 : 0, y: hasScrolledDown ? 0 : 30 }}
-            transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-            className="text-center select-none"
-          >
-            <p style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: 'clamp(9px, 0.9vw, 13px)',
-              letterSpacing: '0.6em',
-              textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.20)',
-              fontWeight: 300,
-              marginBottom: '0.6rem',
-            }}>
-              RUDI — RUDRA VABLE
-            </p>
-            <h2 style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: 'clamp(28px, 5vw, 80px)',
-              letterSpacing: '0.55em',
-              textTransform: 'uppercase',
-              fontWeight: 300,
-              color: 'rgba(255,255,255,0.25)',
-              lineHeight: 1,
-              textShadow: '0 0 40px rgba(255,255,255,0.05)',
-              paddingLeft: '0.55em',
-            }}>
-              TON 618
-            </h2>
-          </motion.div>
-        </div>
-
-        {/* ── CROSS EVENT HORIZON CTA BUTTON ── */}
-        <div className="fixed inset-0 z-20 pointer-events-none flex items-end justify-center pb-16 sm:pb-20">
+        {/* ── CROSS EVENT HORIZON CTA BUTTON (COMPACT BLACK & WHITE GLASSMORPHISM) ── */}
+        <div className="fixed inset-0 z-20 pointer-events-none flex items-end justify-center pb-12 sm:pb-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{
               opacity: hasScrolledDown && !isInsideSingularity ? 1 : 0,
               y: hasScrolledDown && !isInsideSingularity ? 0 : 20,
             }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
             className={hasScrolledDown && !isInsideSingularity ? 'pointer-events-auto text-center' : 'pointer-events-none text-center'}
           >
             <button
@@ -451,15 +417,12 @@ export default function App() {
               onClick={handleCrossEventHorizon}
               onMouseEnter={() => soundEngine.playHoverSound()}
               disabled={isWarping}
-              className="group relative inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full border border-amber-500/50 bg-black/85 hover:bg-amber-500/10 text-amber-300 hover:text-amber-200 font-mono text-[10px] tracking-[0.3em] uppercase transition-all duration-300 shadow-[0_0_30px_rgba(245,158,11,0.25)] hover:shadow-[0_0_45px_rgba(245,158,11,0.5)] cursor-pointer"
+              className="group relative inline-flex items-center gap-2 px-4 py-1.5 sm:px-4.5 sm:py-2 rounded-full border border-white/25 hover:border-white/60 bg-black/45 hover:bg-white/10 backdrop-blur-xl text-white font-mono text-[9px] sm:text-[10px] tracking-[0.25em] uppercase transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.06),inset_0_0_12px_rgba(255,255,255,0.03)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] cursor-pointer"
             >
-              <Zap className="w-3.5 h-3.5 text-amber-400 group-hover:scale-125 transition-transform animate-pulse" />
+              <Zap className="w-3 h-3 text-white group-hover:scale-110 transition-transform" />
               <span>{isWarping ? 'COLLAPSING GEODESIC...' : 'CROSS EVENT HORIZON'}</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping ml-0.5" />
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse ml-0.5" />
             </button>
-            <p className="font-mono text-[8px] tracking-[0.4em] uppercase text-white/30 mt-2">
-              Tidal Warning: Severe Spacetime Curvature
-            </p>
           </motion.div>
         </div>
 
@@ -632,14 +595,14 @@ export default function App() {
           </div>
         </motion.div>
 
-        {/* ── PROFILE CARD ── */}
+        {/* ── PROFILE CARD (DESKTOP & MOBILE TRIGGER) ── */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: hasScrolledDown && !isInsideSingularity ? 1 : 0, y: hasScrolledDown ? 0 : 40 }}
           transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.5 }}
-          className="fixed z-50 pointer-events-auto bottom-4 left-4 sm:bottom-6 sm:left-6 sm:w-72"
+          className="fixed z-50 pointer-events-auto bottom-4 left-4 sm:bottom-6 sm:left-6"
         >
-          {/* MOBILE: small avatar circle */}
+          {/* MOBILE: small avatar circle button to open card modal */}
           <button
             className="sm:hidden w-14 h-14 rounded-full border-2 border-white/20 overflow-hidden shadow-xl backdrop-blur-xl bg-black/60 flex items-center justify-center cursor-pointer"
             style={{ boxShadow: '0 0 20px rgba(74,144,226,0.3)' }}
@@ -655,157 +618,25 @@ export default function App() {
             }
           </button>
 
-          {/* DESKTOP: full card */}
-          <div className="hidden sm:block border border-white/10 bg-black/75 backdrop-blur-2xl shadow-2xl rounded-2xl overflow-hidden"
-            style={{ boxShadow: '0 0 40px rgba(0,0,0,0.6), inset 0 0 40px rgba(255,255,255,0.02)' }}
-          >
-            <div className="relative w-full aspect-square flex items-center justify-center"
-              style={{ background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0) 70%)' }}
-            >
-              {AVATAR_SRC
-                ? <img src={AVATAR_SRC} alt="Rudi" className="w-full h-full object-cover" />
-                : (
-                  <div className="w-24 h-24 rounded-full border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-1">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                    <span className="font-mono text-[7px] text-white/20 uppercase tracking-widest">Add Photo</span>
-                  </div>
-                )
-              }
-              <div className="absolute inset-0 pointer-events-none"
-                style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.015) 2px, rgba(255,255,255,0.015) 4px)' }}
-              />
-            </div>
-            <div className="p-4">
-              <div className="flex items-start justify-between mb-1">
-                <div>
-                  <h2 className="font-black text-white text-xl uppercase tracking-tighter leading-none">Rudi</h2>
-                  <p className="font-mono text-[9px] tracking-[0.4em] uppercase mt-0.5" style={{ color: '#4a90e2' }}>Rudra Vable</p>
-                </div>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="font-mono text-[7px] text-white/30 uppercase tracking-widest">Open to work</span>
-                </div>
-              </div>
-              <p className="font-mono text-[10px] text-white/50 leading-relaxed mt-2 mb-3">
-                Full-stack dev &amp; ML learner.<br />I build cool sites and dig deep into AI.
-              </p>
-              <div className="flex flex-wrap gap-1 mb-3">
-                {['ML / AI', 'Full Stack', 'Web Design'].map(t => (
-                  <span key={t} className="font-mono text-[7px] uppercase tracking-widest border border-white/10 text-white/40 px-1.5 py-0.5 rounded-sm">{t}</span>
-                ))}
-              </div>
-              <div className="flex items-center gap-2 pt-2.5 border-t border-white/10">
-                <a
-                  href="https://github.com/Neverfinished005"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onMouseEnter={() => soundEngine.playHoverSound()}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded border border-white/10 text-white/40 hover:text-white hover:border-white/30 transition-all duration-200"
-                >
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" /></svg>
-                  <span className="font-mono text-[8px]">GH</span>
-                </a>
-                <a
-                  href="https://www.linkedin.com/in/rudra-vable/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onMouseEnter={() => soundEngine.playHoverSound()}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded border border-white/10 text-white/40 hover:text-[#0a84ff] hover:border-[#0a84ff]/40 transition-all duration-200"
-                >
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
-                  <span className="font-mono text-[8px]">LI</span>
-                </a>
-                <a
-                  href="https://www.instagram.com/rudr_a.25"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onMouseEnter={() => soundEngine.playHoverSound()}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded border border-white/10 text-white/40 hover:text-[#e1306c] hover:border-[#e1306c]/40 transition-all duration-200"
-                >
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" /></svg>
-                  <span className="font-mono text-[8px]">IG</span>
-                </a>
-              </div>
-            </div>
+          {/* DESKTOP: Full Cyber Profile Card */}
+          <div className="hidden sm:block">
+            <CyberProfileCard
+              avatarSrc={AVATAR_SRC}
+              isModal={false}
+            />
           </div>
         </motion.div>
 
-        {/* MOBILE PROFILE MODAL */}
-        {profileOpen && (
-          <motion.div
-            className="sm:hidden fixed inset-0 z-[200] flex items-end pointer-events-auto"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setProfileOpen(false)}
-          >
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-            <motion.div
-              className="relative w-full border-t border-white/10 bg-black/90 backdrop-blur-2xl rounded-t-3xl overflow-hidden"
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex justify-center pt-3 pb-1">
-                <div className="w-10 h-1 rounded-full bg-white/20" />
-              </div>
-              <button
-                onClick={() => setProfileOpen(false)}
-                className="absolute top-4 right-4 w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-white/40 cursor-pointer"
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-              </button>
-              <div className="flex gap-4 p-5 pt-2">
-                <div className="w-20 h-20 rounded-2xl overflow-hidden border border-white/10 flex-shrink-0 bg-white/5 flex items-center justify-center">
-                  {AVATAR_SRC
-                    ? <img src={AVATAR_SRC} alt="Rudi" className="w-full h-full object-cover" />
-                    : <span className="font-black text-white text-3xl">R</span>
-                  }
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h2 className="font-black text-white text-2xl uppercase tracking-tighter leading-none">Rudi</h2>
-                  <p className="font-mono text-[9px] tracking-[0.4em] uppercase mt-0.5 mb-2" style={{ color: '#4a90e2' }}>Rudra Vable</p>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="font-mono text-[7px] text-white/30 uppercase tracking-widest">Open to work</span>
-                  </div>
-                </div>
-              </div>
-              <div className="px-5 pb-2">
-                <p className="font-mono text-[11px] text-white/50 leading-relaxed mb-3">
-                  Full-stack dev &amp; ML learner.<br />I build cool sites and dig deep into AI.
-                </p>
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {['ML / AI', 'Full Stack', 'Web Design'].map(t => (
-                    <span key={t} className="font-mono text-[8px] uppercase tracking-widest border border-white/10 text-white/40 px-2 py-1 rounded">{t}</span>
-                  ))}
-                </div>
-                <div className="flex items-center gap-3 pb-6">
-                  <a href="https://github.com/Neverfinished005" target="_blank" rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-white/10 text-white/50 hover:text-white hover:border-white/30 transition-all">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
-                    <span className="font-mono text-[10px]">GitHub</span>
-                  </a>
-                  <a href="https://www.linkedin.com/in/rudra-vable/" target="_blank" rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-white/10 text-white/50 hover:text-[#0a84ff] hover:border-[#0a84ff]/40 transition-all">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-                    <span className="font-mono text-[10px]">LinkedIn</span>
-                  </a>
-                  <a href="https://www.instagram.com/rudr_a.25" target="_blank" rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-white/10 text-white/50 hover:text-[#e1306c] hover:border-[#e1306c]/40 transition-all">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                    <span className="font-mono text-[10px]">Instagram</span>
-                  </a>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
+        {/* MOBILE MODAL: Full Cyber Profile Card */}
+        <AnimatePresence>
+          {profileOpen && (
+            <CyberProfileCard
+              onClose={() => setProfileOpen(false)}
+              avatarSrc={AVATAR_SRC}
+              isModal={true}
+            />
+          )}
+        </AnimatePresence>
 
         <section className="h-screen w-full flex items-center justify-center pointer-events-none relative z-10">
           {/* First page is kept completely empty of text */}

@@ -4,12 +4,16 @@ import { soundEngine } from '../utils/sfx';
 import { 
   Copy, 
   Check, 
-  ArrowUpRight,
-  Mail,
-  X,
-  Github,
-  Linkedin,
-  Instagram
+  ArrowUpRight, 
+  Mail, 
+  X, 
+  Github, 
+  Linkedin, 
+  Instagram,
+  Send,
+  Loader2,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 
 interface SingularityCoreProps {
@@ -19,19 +23,19 @@ interface SingularityCoreProps {
 const TECH_STACK = [
   {
     category: "Languages",
-    items: ["Python", "TypeScript", "JavaScript", "GLSL / Shaders", "SQL", "HTML5 / CSS3"]
+    items: ["Python", "TypeScript", "JavaScript", "GLSL / Shaders", "HTML5 / CSS3", "PHP", "SQL"]
   },
   {
     category: "AI & Machine Learning",
-    items: ["PyTorch", "TensorFlow", "Scikit-Learn", "Hugging Face", "LLM Integration", "RAG Pipelines", "Computer Vision"]
+    items: ["PyTorch", "Scikit-Learn", "LangChain", "Autonomous Agents", "Predictive Modeling", "AI Security"]
   },
   {
-    category: "Web & Spatial Systems",
-    items: ["React 19", "Next.js", "Three.js", "React Three Fiber", "Tailwind CSS", "Node.js", "Express", "WebSockets"]
+    category: "Web & 3D Systems",
+    items: ["React 19", "Three.js", "WebGL / Raymarching", "Web Audio API", "Tailwind CSS", "Vite", "Node.js"]
   },
   {
     category: "Infrastructure & Toolchain",
-    items: ["Docker", "Git / GitHub", "Linux / Bash", "Vite", "RESTful APIs", "Cloud Run", "CI / CD"]
+    items: ["Git / GitHub", "Linux / Bash", "RESTful APIs", "FastAPI", "Docker", "Vercel"]
   }
 ];
 
@@ -40,31 +44,54 @@ const FEATURED_PROJECTS = [
     title: "Singularity OS — TON 618",
     role: "Lead Creator",
     description: "Interactive 3D black hole raymarched simulation with real-time relativistic spacetime distortion, Web Audio frequency reactivity, and precision camera controls.",
-    tags: ["Three.js", "GLSL", "React 19", "Web Audio API", "Tailwind"],
+    tags: ["Three.js", "GLSL", "React 19", "Web Audio API", "Tailwind CSS"],
     url: "https://github.com/Neverfinished005/PORTFOLIO"
   },
   {
-    title: "Deep Learning & Vision Experiments",
-    role: "ML Engineer",
-    description: "Neural network architectures, transformer models, and computer vision pipelines built for structured inference and classification tasks.",
-    tags: ["Python", "PyTorch", "OpenCV", "Scikit-Learn", "Hugging Face"],
-    url: "https://github.com/Neverfinished005"
+    title: "AGENTOS-",
+    role: "Creator",
+    description: "Zero-overhead runtime safety guard for LangChain & Python agents with budget ceilings, infinite loop detection, and real-time dashboard telemetry.",
+    tags: ["Python", "LangChain", "AI Agents", "Runtime Safety", "Telemetry"],
+    url: "https://github.com/Neverfinished005/AGENTOS-"
   },
   {
-    title: "Full-Stack Web Platforms",
+    title: "ORBITGAURD",
+    role: "Creator",
+    description: "3D Space Situational Awareness (SSA) platform engineered for orbital debris tracking and satellite collision avoidance trajectory modeling.",
+    tags: ["TypeScript", "Three.js", "Orbital Mechanics", "3D Simulation"],
+    url: "https://github.com/Neverfinished005/ORBITGAURD"
+  },
+  {
+    title: "DemandAnalyzer",
+    role: "ML Engineer",
+    description: "Machine learning algorithms predicting future sales, market demand, and production trends for industrial pharmaceuticals and seasonal medicine.",
+    tags: ["Python", "Machine Learning", "Scikit-Learn", "Predictive Analytics"],
+    url: "https://github.com/Neverfinished005/demandanalyzer"
+  },
+  {
+    title: "PENTEST-AI",
+    role: "Security Engineer",
+    description: "AI-driven automated penetration testing and security vulnerability analysis framework with intelligent assessment workflows.",
+    tags: ["Python", "AI Agents", "Cybersecurity", "Automated Auditing"],
+    url: "https://github.com/Neverfinished005/PENTEST-AI"
+  },
+  {
+    title: "ElevAI",
     role: "Full-Stack Developer",
-    description: "High-performance client-server applications, responsive interfaces, and low-latency API integration built with modern TypeScript ecosystems.",
-    tags: ["TypeScript", "Next.js", "React", "Node.js", "REST APIs"],
-    url: "https://github.com/Neverfinished005"
+    description: "AI-augmented web platform built with TypeScript and modern component architecture for intelligent productivity workflows.",
+    tags: ["TypeScript", "React", "AI Integration", "Productivity"],
+    url: "https://github.com/Neverfinished005/ElevAI"
   }
 ];
 
 export default function SingularityCore({ onEscape }: SingularityCoreProps) {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [senderName, setSenderName] = useState('');
+  const [senderEmail, setSenderEmail] = useState('');
   const [senderSubject, setSenderSubject] = useState('Project Collaboration');
   const [senderMessage, setSenderMessage] = useState('');
-  const [transmissionSent, setTransmissionSent] = useState(false);
+  const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [statusFeedback, setStatusFeedback] = useState('');
   const [activeTab, setActiveTab] = useState<'overview' | 'stack' | 'projects' | 'contact'>('overview');
 
   const handleCopyEmail = () => {
@@ -76,7 +103,6 @@ export default function SingularityCore({ onEscape }: SingularityCoreProps) {
           setTimeout(() => setCopiedEmail(false), 2500);
         })
         .catch(() => {
-          // Fallback if clipboard API is restricted
           setCopiedEmail(false);
         });
     } else {
@@ -84,22 +110,65 @@ export default function SingularityCore({ onEscape }: SingularityCoreProps) {
     }
   };
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     soundEngine.playClickSound();
-    setTransmissionSent(true);
 
-    const safeName = senderName.trim().slice(0, 100) || 'Visitor';
-    const safeSubject = senderSubject.slice(0, 100);
-    const safeMessage = senderMessage.trim().slice(0, 1500) || 'Hello Rudi, reaching out regarding your work.';
+    if (!senderEmail.trim() || !senderMessage.trim()) {
+      setFormStatus('error');
+      setStatusFeedback('Please provide both your return email and a message.');
+      return;
+    }
 
-    const mailtoUrl = `mailto:rudra.vable@gmail.com?subject=${encodeURIComponent(
-      `[Portfolio Contact] ${safeSubject} — from ${safeName}`
-    )}&body=${encodeURIComponent(safeMessage)}`;
+    setFormStatus('submitting');
+    setStatusFeedback('Transmitting message directly to rudra.vable@gmail.com...');
 
-    // Safe navigation without triggering popup blockers or tab hijacking
-    window.location.href = mailtoUrl;
-    setTimeout(() => setTransmissionSent(false), 3500);
+    const payload = {
+      name: senderName.trim() || 'Visitor',
+      email: senderEmail.trim(),
+      _subject: `[Singularity Core] ${senderSubject} — from ${senderName.trim() || 'Visitor'}`,
+      message: senderMessage.trim(),
+      _replyto: senderEmail.trim()
+    };
+
+    try {
+      const response = await fetch('https://formsubmit.co/ajax/rudra.vable@gmail.com', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (response.ok || (data && data.success === 'true')) {
+        soundEngine.playClickSound();
+        setFormStatus('success');
+        setStatusFeedback('Message dispatched successfully! It has been delivered directly to rudra.vable@gmail.com.');
+        setSenderName('');
+        setSenderEmail('');
+        setSenderMessage('');
+      } else {
+        // If first-time activation is pending on FormSubmit, notify gracefully
+        if (data && typeof data.message === 'string' && data.message.includes('Activation')) {
+          setFormStatus('success');
+          setStatusFeedback('Transmission recorded! Rudi will receive it once one-time inbox activation is verified.');
+          setSenderName('');
+          setSenderEmail('');
+          setSenderMessage('');
+        } else {
+          setFormStatus('error');
+          setStatusFeedback(
+            data?.message || 'Direct transmission encountered an issue. You can click below to mail Rudi directly via mailto.'
+          );
+        }
+      }
+    } catch {
+      setFormStatus('error');
+      setStatusFeedback('Network error contacting email dispatch. Please use the direct mailto or copy email options below.');
+    }
   };
 
   return (
@@ -212,26 +281,27 @@ export default function SingularityCore({ onEscape }: SingularityCoreProps) {
             </div>
 
             <div className="space-y-2.5 pt-4 border-t border-white/[0.06] text-xs leading-relaxed text-zinc-300">
-              <p>
-                Full-stack developer and machine learning engineer.
-              </p>
-              <p className="text-zinc-400">
-                Focused on building high-performance web systems, deep learning pipelines, and interactive 3D interfaces with modern developer toolchains.
+              <p className="font-mono text-[11px] leading-relaxed text-zinc-300">
+                &gt; "I SPWAN AT NIGHT , CODE , EXPLORE , WATCH STARS ADMIRE NATURE AND MAIN THING IF U WANT TO KNOW ME U JUST NEED TO KNOW ME &lt;&gt;"
               </p>
             </div>
 
             <div className="pt-4 border-t border-white/[0.06] space-y-2">
               <div className="flex items-center justify-between text-xs text-zinc-400 font-mono">
                 <span>GitHub Repositories</span>
-                <span className="text-zinc-200">30+ Projects</span>
+                <span className="text-zinc-200 font-semibold">12 Public Repos</span>
               </div>
               <div className="flex items-center justify-between text-xs text-zinc-400 font-mono">
                 <span>Core Ecosystem</span>
-                <span className="text-zinc-200">React · Python · PyTorch</span>
+                <span className="text-zinc-200">Python · TypeScript · React · 3D</span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-zinc-400 font-mono">
+                <span>GitHub Identity</span>
+                <span className="text-zinc-200">BAT_MAN / Rudi</span>
               </div>
               <div className="flex items-center justify-between text-xs text-zinc-400 font-mono">
                 <span>Work Preference</span>
-                <span className="text-zinc-200">Remote / Global</span>
+                <span className="text-emerald-400 font-medium">Open to Work / Global</span>
               </div>
             </div>
 
@@ -391,7 +461,54 @@ export default function SingularityCore({ onEscape }: SingularityCoreProps) {
                 </div>
 
                 <form onSubmit={handleSendMessage} className="space-y-3.5 text-xs">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Status Banner */}
+                  {formStatus !== 'idle' && (
+                    <div 
+                      className={`p-3 rounded-lg border flex items-start gap-2.5 ${
+                        formStatus === 'submitting'
+                          ? 'border-blue-500/30 bg-blue-500/10 text-blue-200'
+                          : formStatus === 'success'
+                          ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
+                          : 'border-amber-500/30 bg-amber-500/10 text-amber-200'
+                      }`}
+                    >
+                      {formStatus === 'submitting' && (
+                        <Loader2 className="w-4 h-4 text-blue-400 animate-spin flex-shrink-0 mt-0.5" />
+                      )}
+                      {formStatus === 'success' && (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      )}
+                      {formStatus === 'error' && (
+                        <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                      )}
+                      <div className="flex-1 text-[11px] leading-relaxed">
+                        <p>{statusFeedback}</p>
+                        {formStatus === 'error' && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <a
+                              href={`mailto:rudra.vable@gmail.com?subject=${encodeURIComponent(
+                                `[Direct Reachout] ${senderSubject}`
+                              )}&body=${encodeURIComponent(senderMessage)}`}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-white text-zinc-950 rounded font-medium text-[10px] hover:bg-zinc-200 transition-colors"
+                            >
+                              <Mail className="w-3 h-3" />
+                              <span>Open in Mail App</span>
+                            </a>
+                            <button
+                              type="button"
+                              onClick={handleCopyEmail}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 border border-white/20 hover:border-white/40 rounded text-white text-[10px] transition-colors"
+                            >
+                              <Copy className="w-3 h-3" />
+                              <span>Copy rudra.vable@gmail.com</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                       <label className="block font-mono text-zinc-400 mb-1.5 text-xs">
                         Your Name / Team
@@ -407,6 +524,23 @@ export default function SingularityCore({ onEscape }: SingularityCoreProps) {
                         className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.08] focus:border-white/[0.3] rounded-lg text-white placeholder-zinc-600 focus:outline-none transition-colors text-[16px] sm:text-xs"
                       />
                     </div>
+
+                    <div>
+                      <label className="block font-mono text-zinc-400 mb-1.5 text-xs">
+                        Your Email Address <span className="text-emerald-400">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        maxLength={120}
+                        autoComplete="email"
+                        value={senderEmail}
+                        onChange={(e) => setSenderEmail(e.target.value)}
+                        placeholder="e.g. alex@company.com"
+                        className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.08] focus:border-white/[0.3] rounded-lg text-white placeholder-zinc-600 focus:outline-none transition-colors text-[16px] sm:text-xs"
+                      />
+                    </div>
+
                     <div>
                       <label className="block font-mono text-zinc-400 mb-1.5 text-xs">
                         Topic
@@ -414,7 +548,7 @@ export default function SingularityCore({ onEscape }: SingularityCoreProps) {
                       <select
                         value={senderSubject}
                         onChange={(e) => setSenderSubject(e.target.value)}
-                        className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.08] focus:border-white/[0.3] rounded-lg text-white focus:outline-none transition-colors text-[16px] sm:text-xs"
+                        className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.08] focus:border-white/[0.3] rounded-lg text-white focus:outline-none transition-colors text-[16px] sm:text-xs cursor-pointer"
                       >
                         <option value="Project Collaboration">Project Collaboration</option>
                         <option value="Full-Time Engineering Role">Full-Time Engineering Role</option>
@@ -426,7 +560,7 @@ export default function SingularityCore({ onEscape }: SingularityCoreProps) {
 
                   <div>
                     <label className="block font-mono text-zinc-400 mb-1.5 text-xs">
-                      Message
+                      Message <span className="text-emerald-400">*</span>
                     </label>
                     <textarea
                       rows={3}
@@ -434,19 +568,32 @@ export default function SingularityCore({ onEscape }: SingularityCoreProps) {
                       maxLength={1500}
                       value={senderMessage}
                       onChange={(e) => setSenderMessage(e.target.value)}
-                      placeholder="Write your note or project scope..."
+                      placeholder="Write your note, role details, or project scope..."
                       className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.08] focus:border-white/[0.3] rounded-lg text-white placeholder-zinc-600 focus:outline-none transition-colors resize-none text-[16px] sm:text-xs"
                     />
                   </div>
 
-                  <div className="flex items-center justify-end pt-1">
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                    <span className="text-[10px] font-mono text-zinc-500">
+                      Direct transmission to rudra.vable@gmail.com
+                    </span>
                     <button
                       type="submit"
+                      disabled={formStatus === 'submitting'}
                       onMouseEnter={() => soundEngine.playHoverSound()}
-                      className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-zinc-950 font-medium text-xs rounded-lg hover:bg-zinc-200 transition-colors cursor-pointer shadow-sm"
+                      className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-zinc-950 font-medium text-xs rounded-lg hover:bg-zinc-200 transition-colors cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Mail className="w-3.5 h-3.5" />
-                      <span>{transmissionSent ? 'Opening Mail Client...' : 'Send Message'}</span>
+                      {formStatus === 'submitting' ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Transmitting...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-3.5 h-3.5" />
+                          <span>Send Direct Message</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </form>
